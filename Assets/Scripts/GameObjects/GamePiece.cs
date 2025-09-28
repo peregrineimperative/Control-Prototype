@@ -6,81 +6,46 @@ using UnityEngine.EventSystems;
 /// The players' game pieces that move around the board.
 /// Instantiated by clicking on SpawnPoint.
 /// </summary>
-public class GamePiece : MonoBehaviour, IHoverable
+public class GamePiece : PieceParent, IDraggable
 {
-    [SerializeField] private Collider pieceCollider;
-    [SerializeField] private Renderer renderer;
-    
-    
-    public GameObject CurrentCell { get; set; }
-    public Player Owner { get; set; }
-    
-    //Color variables
-    private bool _isHighlighted;
-    private MaterialPropertyBlock _mpb;
-    private Color _defaultColor;
-    private Color _pieceColor;
-    private Color _highlightColor;
-
-    private void Awake()
+    public void OnPointerDown(PointerEventData eventData)
     {
-        Owner = GetComponentInParent<Player>();
-    }
-    
-    private void Start()
-    {
-        if (!renderer) renderer = GetComponent<Renderer>();
-        
-        CurrentCell = Owner.SpawnLocation;
-        
-        Debug.Log($"{this} is tied to cell {CurrentCell}");
-        transform.position = CurrentCell.GetComponent<CellData>().GetSnapPosition(gameObject, CurrentCell.GetComponent<CellData>().TopPiece);
-        Debug.Log($"{this} is snapped to {transform.position}");
-        CurrentCell.GetComponent<CellData>().AddOccupant(gameObject);
-        Debug.Log(CurrentCell.GetComponent<CellData>().TopPiece);
-        SetColors();
+        //select
+        //remove highlight if highlighted
     }
 
-    private void SetColors()
+    public void OnPointerUp(PointerEventData eventData)
     {
-        //_defaultColor = renderer.materials[1].color;
-        _pieceColor = Owner.ColorTheme.pieceColor;
-        _highlightColor = Owner.ColorTheme.highlightColor;
-        
-        _mpb = new MaterialPropertyBlock();
-        
-        renderer.materials[0].SetColor("_Color", _pieceColor);
-    }
-    
-    
-    //Events
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        //renderer.materials[1].OutlineColor        
+        //release
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnBeginDrag(PointerEventData eventData)
     {
-        //Remove highlight
-    }    
-    
-    
-    //Used in previous iteration of snapping mechanism
-    //public float PieceTopY => pieceCollider != null ? pieceCollider.bounds.max.y : transform.position.y;
-    //public float PieceBottomY => pieceCollider != null ? pieceCollider.bounds.min.y : transform.position.y;
+        //start drag
+    }
 
-    //snapping functionality moved to cell; might move to Grid Manager or back here, I don't know yet.
-    /*public void SnapToTop(GameObject target)
+    public void OnDrag(PointerEventData eventData)
     {
-        var targetPosition = target.GetComponent<Transform>().position;
-        
-        float snapToY = target.GetComponent<Collider>().bounds.max.y + (pieceCollider.bounds.size.y / 2);
-        
-        transform.position = new Vector3(targetPosition.x, snapToY, targetPosition.z);
-        
-    }*/
-    //on move to cell
-    //paint cell
-    //snap to highest center point.
-    
+        //Make sure that object maintains constant Y position
+        //Determine the tile directly beneath
+            //Highlight that tile
+        //update drag position
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        //Check if there is a marked tile
+        //If so, snap piece to that tile, set occupied, etc.
+        //If not, snap back to previous tile
+    }
+
+    private GameObject TryGetCellBelow()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 6, QueryTriggerInteraction.Ignore))
+        {
+            return hit.collider.;
+        }
+        return null;
+
+    }
 }

@@ -373,7 +373,7 @@
     "m_DefaultRefNameVersion": 1,
     "m_RefNameGeneratedByDisplayName": "OutlineColor",
     "m_DefaultReferenceName": "_OutlineColor",
-    "m_OverrideReferenceName": "OutlineColor",
+    "m_OverrideReferenceName": "_OutlineColor",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

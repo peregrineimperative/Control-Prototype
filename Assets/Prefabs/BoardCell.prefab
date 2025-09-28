@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 899295655798847482}
   - component: {fileID: 3971634352585033630}
   - component: {fileID: 4471070604249054036}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BoardCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,7 +67,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 784d04c532f52af46b90ff4b1955b092, type: 2}
-  - {fileID: 2100000, guid: 9d4d3ea1302262644a422e1ed8a41962, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

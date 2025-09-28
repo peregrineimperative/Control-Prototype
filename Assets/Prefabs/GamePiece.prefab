@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4182591480882133815}
   - component: {fileID: 5321005682842593874}
   - component: {fileID: -200090168994589421}
-  - component: {fileID: -8876986492911136158}
   m_Layer: 0
   m_Name: GamePiece
   m_TagString: Untagged
@@ -68,7 +67,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 2e23b2fb71576194d991625f1c0edb40, type: 2}
-  - {fileID: 2100000, guid: 9d4d3ea1302262644a422e1ed8a41962, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -124,17 +122,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceCollider: {fileID: 5321005682842593874}
-  renderer: {fileID: 4182591480882133815}
---- !u!114 &-8876986492911136158
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4594040536262804213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95cb6ace3a0e2424bb0c05087bce3265, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   renderer: {fileID: 4182591480882133815}

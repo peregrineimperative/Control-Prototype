@@ -75,12 +75,15 @@ public class CellData : MonoBehaviour {
         {
             if (occupant == null) continue;
             var owner = occupant.GetComponent<GamePiece>().Owner;
+            //Check if the counts dictionary already contains the owner as the key
             if (counts.ContainsKey(owner))
             {
+                //If so, increment their count
                 counts[owner]++;
             }
             else
             {
+                //If not, add them to the count, and give them a tally
                 counts.Add(owner, 1);
             }
         }
