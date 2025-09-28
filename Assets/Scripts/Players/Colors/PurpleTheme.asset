@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47afcf2d3e66a6409bba6cb39a3df52, type: 3}
   m_Name: PurpleTheme
   m_EditorClassIdentifier: 
-  pieceColor: {r: 0, g: 0, b: 0, a: 0}
-  paintColor: {r: 0, g: 0, b: 0, a: 0}
-  highlightColor: {r: 0, g: 0, b: 0, a: 0}
+  pieceColor: {r: 0.49113926, g: 0.09055884, b: 0.6075471, a: 0}
+  paintColor: {r: 0.7466055, g: 0.13282305, b: 0.7735849, a: 0}
+  highlightColor: {r: 0.94716984, g: 0.119736545, b: 0.83183825, a: 0}

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47afcf2d3e66a6409bba6cb39a3df52, type: 3}
   m_Name: OrangeTheme
   m_EditorClassIdentifier: 
-  pieceColor: {r: 0, g: 0, b: 0, a: 0}
-  paintColor: {r: 0, g: 0, b: 0, a: 0}
-  highlightColor: {r: 0, g: 0, b: 0, a: 0}
+  pieceColor: {r: 0.83396226, g: 0.52405214, b: 0.017308632, a: 0}
+  paintColor: {r: 1, g: 0.5035719, b: 0.16470587, a: 0}
+  highlightColor: {r: 1, g: 0.7124238, b: 0, a: 0}

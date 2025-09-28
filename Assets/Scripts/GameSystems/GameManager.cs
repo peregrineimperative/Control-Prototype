@@ -1,21 +1,34 @@
 using UnityEngine;
 
+/// <summary>
+/// Singleton manager responsible for setting up the game/other managers in proper order.
+/// </summary>
+
 public class GameManager : MonoBehaviour
 {
+
+    [SerializeField] private GameObject gridManagerPrefab;
+    [SerializeField] private GameObject playerManagerPrefab;
     
-    public GridManager GridManager;
-    public PlayerManager PlayerManager;
+    #region Singleton Setup
+    public static GameManager Instance {get; private set;}
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    #endregion
     
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    //Grid Manager needs to exist before Player Manager, otherwise spawn locations will not exist.
     void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameObject gridManager = Instantiate(gridManagerPrefab);
+        GameObject playerManager = Instantiate(playerManagerPrefab);
     }
 }

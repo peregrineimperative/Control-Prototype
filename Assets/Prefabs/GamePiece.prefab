@@ -124,6 +124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceCollider: {fileID: 5321005682842593874}
+  renderer: {fileID: 4182591480882133815}
 --- !u!114 &-8876986492911136158
 MonoBehaviour:
   m_ObjectHideFlags: 0

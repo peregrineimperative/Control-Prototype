@@ -67,6 +67,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 784d04c532f52af46b90ff4b1955b092, type: 2}
+  - {fileID: 2100000, guid: 9d4d3ea1302262644a422e1ed8a41962, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -121,3 +122,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0914543208e93634a901b6ca4fabf2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cellCollider: {fileID: 0}

@@ -1,8 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+
+/// <summary>
+/// Singleton manager responsible for instantiating the game board.
+/// </summary>
 public class GridManager : MonoBehaviour
 {
-
+    
     [Header("Grid Settings")] 
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private int gridWidth;
@@ -14,11 +18,30 @@ public class GridManager : MonoBehaviour
     
     public List<GameObject> StartingPositions { get; private set; }
     
+    #region Singleton Setup
+    public static GridManager Instance {get; private set;}
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    #endregion
+    
     void Start()
     {
         Grid = new GameObject[gridWidth, gridDepth];
         GenerateNewGrid(gridWidth, gridDepth);
+        
         //Create spawn points
+        StartingPositions = new List<GameObject>();
+        StartingPositions.Add(Grid[0, 0]);
+        StartingPositions.Add(Grid[gridWidth - 1, gridDepth - 1]);
         //Create towers
     }
 
@@ -30,15 +53,14 @@ public class GridManager : MonoBehaviour
             for (int z = 0; z < depth; z++)
             {
                 //Create a tile at all positions, then add that tile to the list.
-                Grid[x, z] = CreateCell(cellPrefab, x, z, 0, Quaternion.identity);
+                Grid[x, z] = CreateCell(cellPrefab, x, z, Quaternion.identity);
             }
         }
     }
     
-    
-    private GameObject CreateCell(GameObject cellType, int xPosition, int zPosition, float yLayer, Quaternion rotation)
+    private GameObject CreateCell(GameObject cellType, int xPosition, int zPosition, Quaternion rotation)
     {
-        Vector3 position = new Vector3(xPosition, yLayer + .5f, zPosition);
+        Vector3 position = new Vector3(xPosition, .5f, zPosition);
         GameObject cell = Instantiate(cellType, position, rotation);
         var data = cell.GetComponent<CellData>();
         data.SetGridPosition(new Vector2Int(xPosition, zPosition));
