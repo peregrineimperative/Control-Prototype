@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public interface IDraggable : IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public void OnPointerDown(PointerEventData eventData)
+    /*public void OnPointerDown(PointerEventData eventData)
     {
         //select
         //remove highlight if highlighted
@@ -17,7 +17,6 @@ public class DragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void OnBeginDrag(PointerEventData eventData)
     {
         //start drag
-        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -28,6 +27,5 @@ public class DragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void OnEndDrag(PointerEventData eventData)
     {
         //finish drag
-    }
-
+    }*/
 }
