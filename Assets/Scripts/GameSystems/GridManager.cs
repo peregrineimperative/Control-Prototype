@@ -62,7 +62,7 @@ public class GridManager : MonoBehaviour
     {
         Vector3 position = new Vector3(xPosition, .5f, zPosition);
         GameObject cell = Instantiate(cellType, position, rotation);
-        var data = cell.GetComponent<CellData>();
+        var data = cell.GetComponent<BoardCell>();
         data.SetGridPosition(new Vector2Int(xPosition, zPosition));
         return cell;
     }

@@ -8,32 +8,64 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class GamePiece : PieceParent, IDraggable
 {
+    
+    private Plane _dragPlane;
+    private Vector3 _dragOffset;
+    private GameObject _hoveredCell;
+    private GameObject _nextCell;
+    
+    private Vector3 _startPosition;
+    
+    
     public void OnPointerDown(PointerEventData eventData)
     {
-        //select
-        //remove highlight if highlighted
+        _startPosition = transform.position;
+
+        //transform.position = new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        //release
+        //transform.position = _startPosition;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        //start drag
+        Debug.Log("Begin Drag");
+        
+        _dragPlane = new Plane(Vector3.up, transform.position);
+        
+        var ray = Camera.main.ScreenPointToRay(eventData.position);
+        
+        _dragPlane.Raycast(ray, out float distance);
+        
+        _dragOffset = transform.position - ray.GetPoint(distance);
+        
+        _hoveredCell = TryGetCellBelow();
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        //Make sure that object maintains constant Y position
-        //Determine the tile directly beneath
-            //Highlight that tile
-        //update drag position
+        //Movement to raycast on _dragPlane
+        var ray = Camera.main.ScreenPointToRay(eventData.position);
+        
+        _dragPlane.Raycast(ray, out float distance);
+        
+        var targetPosition = ray.GetPoint(distance) + _dragOffset;
+        
+        transform.position = targetPosition;
+        
+        //Cell detection
+        _hoveredCell = TryGetCellBelow();
+        _nextCell = CurrentCell;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        //If there is an actively hovered cell when ending drag, have the piece snap to that cell, otherwise return to start
+        transform.position = _hoveredCell != null ? _hoveredCell.GetComponent<BoardCell>().GetSnapPosition(gameObject) : _startPosition;
+        
+        
         //Check if there is a marked tile
         //If so, snap piece to that tile, set occupied, etc.
         //If not, snap back to previous tile
@@ -41,9 +73,9 @@ public class GamePiece : PieceParent, IDraggable
 
     private GameObject TryGetCellBelow()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 6, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 1 << 6, QueryTriggerInteraction.Ignore))
         {
-            return hit.collider.;
+            return hit.collider.gameObject;
         }
         return null;
 

@@ -16,7 +16,7 @@ public class PieceParent : MonoBehaviour, IHoverable
     //Color variables
     private bool _isHighlighted;
     private Color _pieceColor;
-    private Color _highlightColor;
+    public Color _highlightColor;
     
     private void Start()
     {
@@ -27,10 +27,10 @@ public class PieceParent : MonoBehaviour, IHoverable
         _highlightColor = Owner.ColorTheme.highlightColor;
         
         Debug.Log($"{this} is tied to cell {CurrentCell}");
-        transform.position = CurrentCell.GetComponent<CellData>().GetSnapPosition(gameObject, CurrentCell.GetComponent<CellData>().TopPiece);
+        transform.position = CurrentCell.GetComponent<BoardCell>().GetSnapPosition(gameObject);
         Debug.Log($"{this} is snapped to {transform.position}");
-        CurrentCell.GetComponent<CellData>().AddOccupant(gameObject);
-        Debug.Log(CurrentCell.GetComponent<CellData>().TopPiece);
+        CurrentCell.GetComponent<BoardCell>().AddOccupant(gameObject);
+        Debug.Log(CurrentCell.GetComponent<BoardCell>().TopPiece);
         
         renderer.SetBaseColor(_pieceColor);
     }
