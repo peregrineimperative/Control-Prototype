@@ -1,6 +1,6 @@
-using System.Buffers;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 /// <summary>
 /// The players' game pieces that move around the board.
@@ -16,10 +16,33 @@ public class GamePiece : PieceParent, IDraggable
     
     private Vector3 _startPosition;
 
+    private Dictionary<BoardCell, int> _reachableCells;
+    private List<BoardCell> _highlightedCells;
+    private bool _isShowingHighlights;
+    private bool _isInteracting;
+    private bool _isDragging;
+    
+
     protected override void Start()
     {
         base.Start();
         CurrentCell.AddOccupant(this);
+    }
+
+    private void Update()
+    {
+        if (!_isInteracting) return;
+        
+        bool modifierHeld = IsModifierHeld();
+        
+        if (modifierHeld && !_isShowingHighlights)
+        {
+            ShowHighlights();
+        }
+        else if (!modifierHeld && _isShowingHighlights)
+        {
+            ClearHighlights();
+        }
     }
     
     
@@ -27,18 +50,29 @@ public class GamePiece : PieceParent, IDraggable
     //---Events---
     public void OnPointerDown(PointerEventData eventData)
     {
+        _isInteracting = true;
+        _isDragging = false;
         _startPosition = transform.position;
+        _reachableCells = GridManager.Instance.GetReachableCells(CurrentCell, Owner.Energy);
 
-        //transform.position = new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z);
+        if (IsModifierHeld())
+        {
+            ShowHighlights();
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        //transform.position = _startPosition;
+        if (!_isDragging)
+        {
+            ResetGamePiece();
+        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        _isDragging = true;
+        
         //Instantiate plane to keep movement on XZ, maintaining Y position
         _dragPlane = new Plane(Vector3.up, transform.position);
         
@@ -51,7 +85,7 @@ public class GamePiece : PieceParent, IDraggable
         _hoveredCell = TryGetCellBelow();
         
         //Set
-        if (_hoveredCell != null)
+        if (IsReachable(_hoveredCell))
         {
             _previousCell = _hoveredCell;
             _hoveredCell.PreviewOwnership(this);
@@ -60,6 +94,9 @@ public class GamePiece : PieceParent, IDraggable
         {
             _previousCell = CurrentCell.GetComponent<BoardCell>();
         }
+        
+        
+        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -79,10 +116,11 @@ public class GamePiece : PieceParent, IDraggable
         //Preview cell color on hover
         if (_hoveredCell != _previousCell)
         {
-            _previousCell?.RefreshPaint();
+            RestoreCellVisual(_previousCell);
         }
         _previousCell = _hoveredCell;
-        if (_hoveredCell != null)
+        
+        if (IsReachable(_hoveredCell))
         {
             _hoveredCell.PreviewOwnership(this);
         }
@@ -91,10 +129,15 @@ public class GamePiece : PieceParent, IDraggable
     public void OnEndDrag(PointerEventData eventData)
     {
         //If there is an actively hovered cell when ending drag, have the piece snap to that cell, otherwise return to start
-        if (_hoveredCell != null)
+        //Determine if selection is a valid move
+        if (IsReachable(_hoveredCell))
         {
             if (_hoveredCell != CurrentCell)
             {
+                
+                //Deplete energy here
+                //if (_reachableCells.TryGetValue(_hoveredCell, out var cost)) {Owner.Energy -= cost;}
+                
                 transform.position = _hoveredCell.GetSnapPosition(gameObject);
                 _hoveredCell.FinalizeOwnership(this);
                 CurrentCell.RemoveOccupant(this);
@@ -104,25 +147,34 @@ public class GamePiece : PieceParent, IDraggable
             else
             {
                 transform.position = _startPosition;
-                _hoveredCell.RefreshPaint();
+                RestoreCellVisual(_hoveredCell);
             }
         }
         else
         {
-            transform.position = _startPosition;       
+            transform.position = _startPosition;
+            RestoreCellVisual(_hoveredCell);
         }
 
         if (_previousCell != null && _previousCell != _hoveredCell)
         {
-            _previousCell.RefreshPaint();       
+            RestoreCellVisual(_previousCell);     
         }
         
         //Reset
-        _hoveredCell = null;
-        _previousCell = null;
-        
+        ResetGamePiece();
     }
 
+    private void ResetGamePiece()
+    {
+        _hoveredCell = null;
+        _previousCell = null;
+        _isInteracting = false;
+        ClearHighlights();
+        _reachableCells = null;
+        
+    }
+    
     private BoardCell TryGetCellBelow()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 1 << 6, QueryTriggerInteraction.Ignore))
@@ -132,4 +184,45 @@ public class GamePiece : PieceParent, IDraggable
         return null;
 
     }
+
+    private bool IsReachable(BoardCell cell)
+    {
+        return _reachableCells != null && cell != null && _reachableCells.ContainsKey(cell);
+    }
+    
+    //---Highlighting within range---
+    private bool IsModifierHeld()
+    {
+        return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    }
+
+    private void ShowHighlights()
+    {
+        if (_isShowingHighlights) return;
+        _highlightedCells = ColorHelper.HighlightReachableCells(_reachableCells, Owner.Energy);
+        _isShowingHighlights = true;
+    }
+
+    private void ClearHighlights()
+    {
+        if (!_isShowingHighlights) return;
+        ColorHelper.ClearHighlights(_highlightedCells);
+        _highlightedCells = null;
+        _isShowingHighlights = false;
+    }
+
+    private void RestoreCellVisual(BoardCell cell)
+    {
+        if (cell == null) return;
+
+        if (_isShowingHighlights && _reachableCells != null && _reachableCells.TryGetValue(cell, out int dist))
+        {
+            cell.SetMoveHighlight(ColorHelper.StepGradient(dist, Owner.Energy));
+        }
+        else
+        {
+            cell.RefreshPaint();
+        }
+    }
+    
 }

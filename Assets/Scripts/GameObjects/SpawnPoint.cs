@@ -30,5 +30,6 @@ public class SpawnPoint : PieceParent, IClickable
         newPiece.GetComponent<GamePiece>().Owner = Owner;
         newPiece.GetComponent<GamePiece>().CurrentCell = CurrentCell;
         
+        //Remove energy to create game piece
     }
 }
