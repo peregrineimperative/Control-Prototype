@@ -10,13 +10,26 @@ public class BoardCell : MonoBehaviour {
     [SerializeField] public Renderer cellRenderer;
     [SerializeField] private Color defaultColor;
     
-    public Vector2Int GridPosition { get; private set; }
+    
     public Player CurrentOwner { get; set; }
     public Player TowerOwner { get; set; } //Set if this cell is within a captured tower's radius.
     
     [SerializeField] public GameObject baseObject; //Object upon which other objects will stack, if any. (i.e., towers or spawn points)
     
     private List<GameObject> _occupants = new List<GameObject>();
+
+    private Vector2Int _gridPosition;
+    public Vector2Int GridPosition
+    {
+        get {return _gridPosition;}
+
+        set
+        {
+            if (value == _gridPosition) return;
+            _gridPosition = value;
+            gameObject.name = $"Cell {GridPosition.x} x {GridPosition.y}";
+        }
+    }
     
     //If the _occupants list is not zero, record the last entry on the list as the top piece. Otherwise, return the base object (usually the cell itself)
     [SerializeField] public GameObject TopPiece
@@ -42,12 +55,6 @@ public class BoardCell : MonoBehaviour {
     
     //---Physical Space---
     #region Physical Space
-    public void SetGridPosition(Vector2Int gridPosition)
-    {
-        GridPosition = gridPosition;
-        
-        gameObject.name = $"Cell {GridPosition.x} x {GridPosition.y}";
-    }
     
     //Provide the highest point for a game piece to snap to.
     public Vector3 GetSnapPosition(GameObject inbound)
@@ -87,6 +94,19 @@ public class BoardCell : MonoBehaviour {
     
     //---Cell Painting/Visuals---
     #region Cell Painting/Visuals
+
+    public void SetMoveHighlight(Color color)
+    {
+        IsHighlighted = true;
+        cellRenderer.SetBaseColor(color);
+    }
+    
+    public void ClearMoveHighlight()
+    {
+        IsHighlighted = false;
+        RefreshPaint();
+    }
+    
     //To be called when player hovers piece over cell
     //Show what the tile would look like if piece were placed
     public void PreviewOwnership(GamePiece inbound)

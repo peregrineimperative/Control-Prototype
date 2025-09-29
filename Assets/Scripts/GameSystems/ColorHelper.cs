@@ -17,4 +17,6 @@ public static class ColorHelper
         mbp.SetColor("_BaseColor", color);
         renderer.SetPropertyBlock(mbp);
     }
+    
+    
 }

@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 public class SpawnPoint : PieceParent, IClickable
 {
     [SerializeField] private GameObject piecePrefab;
+    [SerializeField] private int unitCost;
     
     protected override void Start()
     {

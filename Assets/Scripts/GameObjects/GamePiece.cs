@@ -22,6 +22,8 @@ public class GamePiece : PieceParent, IDraggable
         CurrentCell.AddOccupant(this);
     }
     
+    
+    
     //---Events---
     public void OnPointerDown(PointerEventData eventData)
     {
