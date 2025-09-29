@@ -121,4 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0914543208e93634a901b6ca4fabf2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellCollider: {fileID: 0}
+  cellCollider: {fileID: 3971634352585033630}
+  cellRenderer: {fileID: 899295655798847482}
+  defaultColor: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
+  baseObject: {fileID: 0}

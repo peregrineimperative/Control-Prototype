@@ -7,6 +7,12 @@ public class SpawnPoint : PieceParent, IClickable
 {
     [SerializeField] private GameObject piecePrefab;
     
+    protected override void Start()
+    {
+        base.Start();
+        CurrentCell.baseObject = gameObject;
+    }
+    
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("Clicked");
@@ -21,5 +27,7 @@ public class SpawnPoint : PieceParent, IClickable
         
         //Make sure the newly instantiated piece shares the same owner as the spawn point.
         newPiece.GetComponent<GamePiece>().Owner = Owner;
+        newPiece.GetComponent<GamePiece>().CurrentCell = CurrentCell;
+        
     }
 }

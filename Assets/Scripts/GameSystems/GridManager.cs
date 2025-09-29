@@ -66,7 +66,11 @@ public class GridManager : MonoBehaviour
         data.SetGridPosition(new Vector2Int(xPosition, zPosition));
         return cell;
     }
-    
-    //Create spawn points
-    //Create towers
+
+    public List<BoardCell> GetAdjacentCells(BoardCell cell, bool orth)
+    {
+        
+
+        //return cells;
+    }
 }

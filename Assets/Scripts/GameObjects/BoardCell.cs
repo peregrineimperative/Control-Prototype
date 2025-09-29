@@ -11,16 +11,23 @@ public class BoardCell : MonoBehaviour {
     [SerializeField] private Color defaultColor;
     
     public Vector2Int GridPosition { get; private set; }
-    
-    
     public Player CurrentOwner { get; set; }
     public Player TowerOwner { get; set; } //Set if this cell is within a captured tower's radius.
     
+    [SerializeField] public GameObject baseObject; //Object upon which other objects will stack, if any. (i.e., towers or spawn points)
+    
     private List<GameObject> _occupants = new List<GameObject>();
     
-    //If the _occupants list is not zero, record the last entry on the list as the top piece. Otherwise, return the cell itself.
-    public GameObject TopPiece => _occupants.Count > 0 ? _occupants[^1] : gameObject;
-    
+    //If the _occupants list is not zero, record the last entry on the list as the top piece. Otherwise, return the base object (usually the cell itself)
+    [SerializeField] public GameObject TopPiece
+    {
+        get
+        {
+            CleanOccupants();
+            return _occupants.Count > 0 ? _occupants[^1] : baseObject;
+        }
+    }
+
     public bool IsOccupied { get; set; }
     public bool IsHovered { get; set; }
     public bool IsHighlighted { get; set; }
@@ -28,6 +35,7 @@ public class BoardCell : MonoBehaviour {
 
     private void Start()
     {
+        baseObject = gameObject;
         cellRenderer = GetComponent<Renderer>();
         IsHighlighted = false;
     }
@@ -56,19 +64,25 @@ public class BoardCell : MonoBehaviour {
 
     //---Occupant Management---
     #region Occupant Management
-    public void AddOccupant(GameObject piece)
+    public void AddOccupant(PieceParent piece)
     {
-        _occupants.Add(piece);
+        _occupants.Add(piece.gameObject);
     }
     
-    public void RemoveOccupant(GameObject piece)
+    public void RemoveOccupant(PieceParent piece)
     {
-        _occupants.Remove(piece);
-        if (_occupants.Count != 0)
-        {
-            
-        }
+        _occupants.Remove(piece.gameObject);
+        CleanOccupants();
+
+        CurrentOwner = DetermineOwner(null);
+        RefreshPaint();
     }
+
+    private void CleanOccupants()
+    {
+        _occupants.RemoveAll(occupant => occupant == null);
+    }
+    
     #endregion
     
     //---Cell Painting/Visuals---
@@ -82,13 +96,13 @@ public class BoardCell : MonoBehaviour {
     }
     
     //To be called when player finalizes piece position
-    public void FinalizeOwnership(GamePiece inbound, bool preview)
+    public void FinalizeOwnership(GamePiece inbound)
     {
         CurrentOwner = DetermineOwner(inbound?.Owner);
         ApplyPaint(CurrentOwner, preview: false);
     }
     
-    private void ApplyPaint(Player owner, bool preview)
+    public void ApplyPaint(Player owner, bool preview)
     {
         if (owner == null)
         {
@@ -102,7 +116,7 @@ public class BoardCell : MonoBehaviour {
     }
     
     //To be called after previewing without committing
-    private void RefreshPaint()
+    public void RefreshPaint()
     {
         ApplyPaint(CurrentOwner, preview: false);
     }
@@ -173,6 +187,7 @@ public class BoardCell : MonoBehaviour {
     //2. Tower owner, if present
     //3. If tied and tower exists, tower owner
     //4. If tied and no tower, default to neutral color
+    //5. If no occupants and no tower, retain last painted
     private Player DetermineOwner(Player newPieceOwner)
     {
         var majorityOwner = DetermineOccupantMajority(newPieceOwner);
@@ -181,9 +196,13 @@ public class BoardCell : MonoBehaviour {
         {
             return majorityOwner;
         }
-        else
+        else if (TowerOwner != null)
         {
             return TowerOwner;
+        }
+        else
+        {
+            return CurrentOwner;
         }
     }
     #endregion

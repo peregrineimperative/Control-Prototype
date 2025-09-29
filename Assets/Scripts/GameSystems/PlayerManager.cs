@@ -57,7 +57,7 @@ public class PlayerManager : MonoBehaviour {
             playerPrefab,
             spawnLocation.transform.position, 
             Quaternion.identity);
-        player.SpawnLocation = spawnLocation;
+        player.SpawnLocation = spawnLocation.GetComponent<BoardCell>();;
         player.ColorTheme = theme;
         player.Energy = maxEnergy;
         player.PlayerNumber = players.Count + 1;

@@ -8,9 +8,9 @@ using UnityEngine.EventSystems;
 public class PieceParent : MonoBehaviour, IHoverable
 {
     [SerializeField] private Collider pieceCollider;
-    [SerializeField] private Renderer renderer;
+    [SerializeField] private Renderer pieceRenderer;
     
-    public GameObject CurrentCell { get; set; }
+    public BoardCell CurrentCell { get; set; }
     public Player Owner { get; set; }
     
     //Color variables
@@ -18,33 +18,33 @@ public class PieceParent : MonoBehaviour, IHoverable
     private Color _pieceColor;
     public Color _highlightColor;
     
-    private void Start()
+    protected virtual void Start()
     {
-        if (!renderer) renderer = GetComponent<Renderer>();
+        if (!pieceRenderer) pieceRenderer = GetComponent<Renderer>();
         
         CurrentCell = Owner.SpawnLocation;
         _pieceColor = Owner.ColorTheme.pieceColor;
         _highlightColor = Owner.ColorTheme.highlightColor;
         
         Debug.Log($"{this} is tied to cell {CurrentCell}");
-        transform.position = CurrentCell.GetComponent<BoardCell>().GetSnapPosition(gameObject);
+        transform.position = CurrentCell.GetSnapPosition(gameObject);
         Debug.Log($"{this} is snapped to {transform.position}");
-        CurrentCell.GetComponent<BoardCell>().AddOccupant(gameObject);
+        
         Debug.Log(CurrentCell.GetComponent<BoardCell>().TopPiece);
         
-        renderer.SetBaseColor(_pieceColor);
+        pieceRenderer.SetBaseColor(_pieceColor);
     }
     
     //Events
     public void OnPointerEnter(PointerEventData eventData)
     {
-        renderer.SetBaseColor(_highlightColor);
+        pieceRenderer.SetBaseColor(_highlightColor);
         _isHighlighted = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        renderer.SetBaseColor(_pieceColor); 
+        pieceRenderer.SetBaseColor(_pieceColor); 
         _isHighlighted = false;
     }  
 }

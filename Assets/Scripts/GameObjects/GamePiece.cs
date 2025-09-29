@@ -8,15 +8,21 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class GamePiece : PieceParent, IDraggable
 {
-    
     private Plane _dragPlane;
     private Vector3 _dragOffset;
-    private GameObject _hoveredCell;
-    private GameObject _nextCell;
+    
+    private BoardCell _hoveredCell;
+    private BoardCell _previousCell;
     
     private Vector3 _startPosition;
+
+    protected override void Start()
+    {
+        base.Start();
+        CurrentCell.AddOccupant(this);
+    }
     
-    
+    //---Events---
     public void OnPointerDown(PointerEventData eventData)
     {
         _startPosition = transform.position;
@@ -31,17 +37,27 @@ public class GamePiece : PieceParent, IDraggable
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("Begin Drag");
-        
+        //Instantiate plane to keep movement on XZ, maintaining Y position
         _dragPlane = new Plane(Vector3.up, transform.position);
         
+        //Get offset between GamePiece centerpoint and pointer
         var ray = Camera.main.ScreenPointToRay(eventData.position);
-        
         _dragPlane.Raycast(ray, out float distance);
-        
         _dragOffset = transform.position - ray.GetPoint(distance);
         
+        //Cell detection
         _hoveredCell = TryGetCellBelow();
+        
+        //Set
+        if (_hoveredCell != null)
+        {
+            _previousCell = _hoveredCell;
+            _hoveredCell.PreviewOwnership(this);
+        }
+        else
+        {
+            _previousCell = CurrentCell.GetComponent<BoardCell>();
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -57,25 +73,59 @@ public class GamePiece : PieceParent, IDraggable
         
         //Cell detection
         _hoveredCell = TryGetCellBelow();
-        _nextCell = CurrentCell;
+        
+        //Preview cell color on hover
+        if (_hoveredCell != _previousCell)
+        {
+            _previousCell?.RefreshPaint();
+        }
+        _previousCell = _hoveredCell;
+        if (_hoveredCell != null)
+        {
+            _hoveredCell.PreviewOwnership(this);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         //If there is an actively hovered cell when ending drag, have the piece snap to that cell, otherwise return to start
-        transform.position = _hoveredCell != null ? _hoveredCell.GetComponent<BoardCell>().GetSnapPosition(gameObject) : _startPosition;
+        if (_hoveredCell != null)
+        {
+            if (_hoveredCell != CurrentCell)
+            {
+                transform.position = _hoveredCell.GetSnapPosition(gameObject);
+                _hoveredCell.FinalizeOwnership(this);
+                CurrentCell.RemoveOccupant(this);
+                _hoveredCell.AddOccupant(this);
+                CurrentCell = _hoveredCell;
+            }
+            else
+            {
+                transform.position = _startPosition;
+                _hoveredCell.RefreshPaint();
+            }
+        }
+        else
+        {
+            transform.position = _startPosition;       
+        }
+
+        if (_previousCell != null && _previousCell != _hoveredCell)
+        {
+            _previousCell.RefreshPaint();       
+        }
         
+        //Reset
+        _hoveredCell = null;
+        _previousCell = null;
         
-        //Check if there is a marked tile
-        //If so, snap piece to that tile, set occupied, etc.
-        //If not, snap back to previous tile
     }
 
-    private GameObject TryGetCellBelow()
+    private BoardCell TryGetCellBelow()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 1 << 6, QueryTriggerInteraction.Ignore))
         {
-            return hit.collider.gameObject;
+            return hit.collider.GetComponentInParent<BoardCell>();
         }
         return null;
 
