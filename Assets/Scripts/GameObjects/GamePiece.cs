@@ -143,6 +143,7 @@ public class GamePiece : PieceParent, IDraggable
                 CurrentCell.RemoveOccupant(this);
                 _hoveredCell.AddOccupant(this);
                 CurrentCell = _hoveredCell;
+                
             }
             else
             {

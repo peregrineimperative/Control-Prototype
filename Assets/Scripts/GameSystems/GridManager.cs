@@ -10,6 +10,8 @@ public class GridManager : MonoBehaviour
     
     [Header("Grid Settings")] 
     [SerializeField] private GameObject cellPrefab;
+    [SerializeField] private GameObject towerPrefab;
+    
     [SerializeField] private int gridWidth;
     [SerializeField] private int gridDepth;
     
@@ -44,7 +46,36 @@ public class GridManager : MonoBehaviour
         StartingPositions = new List<GameObject>();
         StartingPositions.Add(Grid[0, 0]);
         StartingPositions.Add(Grid[gridWidth - 1, gridDepth - 1]);
+        
         //Create towers
+        SpawnTowers();
+    }
+
+    private void SpawnTowers()
+    {
+        /*ReadOnlySpan<(int dx, int dz)> towerPositions = stackalloc (int dx, int dz)[]
+        {
+            (1, 7),
+            (3, 1),
+            (7, 1),
+            (4, 4),
+            (5, 7)
+        };*/
+
+        Vector2Int[] towerPositions = new Vector2Int[5];
+        towerPositions[0] = new Vector2Int(1, 7);
+        towerPositions[1] = new Vector2Int(3, 1);
+        towerPositions[2] = new Vector2Int(7, 1);
+        towerPositions[3] = new Vector2Int(4, 4);
+        towerPositions[4] = new Vector2Int(5, 7);
+        
+        foreach (Vector2Int position in towerPositions)
+        {
+            var cell = GridManager.Instance.Grid[position.x, position.y].GetComponent<BoardCell>();
+            var tower = Instantiate(towerPrefab, cell.transform.position, Quaternion.identity);
+            tower.GetComponent<Tower>().CurrentCell = cell;
+            cell.Tower = tower.GetComponent<Tower>();
+        }
     }
     
     //---Grid Builders---
@@ -59,6 +90,7 @@ public class GridManager : MonoBehaviour
             {
                 //Create a tile at all positions, then add that tile to the list.
                 Grid[x, z] = CreateCell(cellPrefab, x, z, Quaternion.identity);
+                //Grid[x, z].GetComponent<BoardCell>().baseObject = Grid[x, z];
             }
         }
     }

@@ -15,6 +15,7 @@ public class PlayerManager : MonoBehaviour {
     [SerializeField] private int maxEnergy;
     
     
+    
     #region Singleton Setup
     public static PlayerManager Instance {get; private set;}
     private void Awake()
@@ -67,5 +68,7 @@ public class PlayerManager : MonoBehaviour {
     
     //Need turn management
     //Swap players when out of energy
+    
+    
     
 }

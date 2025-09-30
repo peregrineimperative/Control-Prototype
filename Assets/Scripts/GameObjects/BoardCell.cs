@@ -13,6 +13,8 @@ public class BoardCell : MonoBehaviour {
     
     public Player CurrentOwner { get; set; }
     public Player TowerOwner { get; set; } //Set if this cell is within a captured tower's radius.
+
+    public Tower Tower { get; set; }
     
     [SerializeField] public GameObject baseObject; //Object upon which other objects will stack, if any. (i.e., towers or spawn points)
     
@@ -71,18 +73,37 @@ public class BoardCell : MonoBehaviour {
 
     //---Occupant Management---
     #region Occupant Management
+
+    public bool HasOccupants
+    {
+        get
+        {
+            CleanOccupants();
+            return _occupants.Count > 0;
+        }
+    }
+    
     public void AddOccupant(PieceParent piece)
     {
         _occupants.Add(piece.gameObject);
+        IsOccupied = true;
     }
     
     public void RemoveOccupant(PieceParent piece)
     {
         _occupants.Remove(piece.gameObject);
         CleanOccupants();
+        IsOccupied = _occupants.Count > 0;
+        
 
         CurrentOwner = DetermineOwner(null);
         RefreshPaint();
+
+        if (Tower != null)
+        {
+            Tower.Owner = CurrentOwner;
+            Tower.ApplyInfluence();
+        }
     }
 
     private void CleanOccupants()
@@ -113,6 +134,11 @@ public class BoardCell : MonoBehaviour {
     {
         var previewOwner = DetermineOwner(inbound?.Owner);
         ApplyPaint(previewOwner, true);
+
+        if (Tower != null)
+        {
+            Tower.PreviewInfluence(previewOwner);
+        }
     }
     
     //To be called when player finalizes piece position
@@ -120,6 +146,13 @@ public class BoardCell : MonoBehaviour {
     {
         CurrentOwner = DetermineOwner(inbound?.Owner);
         ApplyPaint(CurrentOwner, preview: false);
+
+        if (Tower != null)
+        {
+            Tower.ClearPreview();
+            Tower.Owner = CurrentOwner;
+            Tower.ApplyInfluence();
+        }
     }
     
     public void ApplyPaint(Player owner, bool preview)
@@ -139,17 +172,23 @@ public class BoardCell : MonoBehaviour {
     public void RefreshPaint()
     {
         ApplyPaint(CurrentOwner, preview: false);
+
+        if (Tower != null)
+        {
+            Tower.ClearPreview();
+        }
     }
     #endregion
 
     //---Cell Ownership---
     #region Cell Ownership
+    
     //Figure out who owns a given cell
     //Should be called only after a move has been made.
     //Call in both the cell being moved away from and onto.
-    private Player DetermineOccupantMajority(Player newPieceOwner = null)
+    private Player DetermineOccupantMajority(Player newPieceOwner, out bool isTie)
     {
-        if (_occupants.Count == 0 && newPieceOwner == null) return null; 
+        //if (_occupants.Count == 0 && newPieceOwner == null) return null; 
         
         var counts = new Dictionary<Player, int>(); //Dictionary to hold player names and current tally
 
@@ -158,33 +197,24 @@ public class BoardCell : MonoBehaviour {
             if (occupant == null) continue;
             var owner = occupant.GetComponent<GamePiece>().Owner;
             //Check if the counts dictionary already contains the owner as the key
-            if (counts.ContainsKey(owner))
-            {
-                //If so, increment their count
-                counts[owner]++;
-            }
-            else
-            {
-                //If not, add them to the count, and give them a tally
-                counts.Add(owner, 1);
-            }
+            counts[owner] = counts.TryGetValue(owner, out var count) ? count + 1 : 1;
         }
         
         //Allow for preview of potential ownership before dropping piece into place.
         if (newPieceOwner != null)
         {
-            if (counts.ContainsKey(newPieceOwner))
-            {
-                counts[newPieceOwner]++;
-            }
-            else
-            {
-                counts.Add(newPieceOwner, 1);
-            }
+            counts[newPieceOwner] = counts.TryGetValue(newPieceOwner, out var newCount) ? newCount + 1 : 1;
+        }
+
+        if (counts.Count == 0)
+        {
+            isTie = false;
+            return null;
         }
 
         Player majorityOwner = null;
         int maxCount = 0;
+        int numAtMax = 0;
         
         foreach (var count in counts)
         {
@@ -192,14 +222,16 @@ public class BoardCell : MonoBehaviour {
             {
                 majorityOwner = count.Key;
                 maxCount = count.Value;
+                numAtMax = 1;
             }
             else if (count.Value == maxCount)
             {
-                majorityOwner = null;
+                numAtMax++;
             }
         }
         
-        return majorityOwner;
+        isTie = numAtMax > 1;
+        return isTie ? null : majorityOwner;
     }
         
     //Owner Priority Rules:
@@ -210,20 +242,25 @@ public class BoardCell : MonoBehaviour {
     //5. If no occupants and no tower, retain last painted
     private Player DetermineOwner(Player newPieceOwner)
     {
-        var majorityOwner = DetermineOccupantMajority(newPieceOwner);
+        var majorityOwner = DetermineOccupantMajority(newPieceOwner, out bool isTie);
         
         if (majorityOwner != null)
         {
             return majorityOwner;
         }
-        else if (TowerOwner != null)
+
+        if (isTie)
+        {
+            return null;
+        }
+        
+        if (TowerOwner != null)
         {
             return TowerOwner;
         }
-        else
-        {
-            return CurrentOwner;
-        }
+        
+        return CurrentOwner;
+        
     }
     #endregion
 }

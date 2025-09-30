@@ -45,5 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 8826956231309040373, guid: d79a3f6f427d530439c39070dbdb25e4, type: 3}
+  towerPrefab: {fileID: 5460490665973821612, guid: 855486a38c42c1a479df15223f429507, type: 3}
   gridWidth: 9
   gridDepth: 9

@@ -51,3 +51,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a173ddf2bdeb2841ba1529d668c9b4a, type: 2}
   playerCount: 2
   maxEnergy: 5
+  towerPrefab: {fileID: 5460490665973821612, guid: 855486a38c42c1a479df15223f429507, type: 3}
