@@ -24,8 +24,24 @@ public class Player : MonoBehaviour
         SpawnLocation.baseObject = playerSpawnPoint;
         Debug.Log($"Spawn base: {SpawnLocation.baseObject}");
     }
+
+    private void TrySpendEnergy(int energyCost)
+    {
+        if (Energy >= energyCost)
+        {
+            Energy -= energyCost;
+            if (Energy <= 0)
+            {
+                TurnEnd();
+            }
+        }
+        else
+        {
+            Debug.LogError("Not enough energy to perform action.");
+        }
+    }
     
-    private void TurnStart()
+    public void TurnStart()
     {
         HasControls(true);
         Energy = PlayerManager.Instance.maxEnergy;
@@ -33,6 +49,7 @@ public class Player : MonoBehaviour
     private void TurnEnd()
     {
         HasControls(false);
+        PlayerManager.Instance.GoToNextPlayer();
     }
 
     private void HasControls( bool isTurn)

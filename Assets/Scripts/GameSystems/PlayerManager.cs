@@ -18,6 +18,7 @@ public class PlayerManager : MonoBehaviour {
     //Turn management variables
     private Player ActivePlayer { get; set; }
     private int RoundCount { get; set; }
+    private int ActivePlayerIndex { get; set; }
     
     
     //---Singleton Setup---
@@ -39,13 +40,13 @@ public class PlayerManager : MonoBehaviour {
     
     private void Start()
     {
+        //Instantiate players based on player count set in inspector (or menu someday maybe who knows)
         for (int i = 0; i< playerCount; i++)
         {
             SpawnPlayer(i);
         }
         
-        ActivePlayer = players[0];
-        RoundCount = 0;
+        StartGame();
     }
 
     private Player SpawnPlayer(int index)
@@ -75,20 +76,38 @@ public class PlayerManager : MonoBehaviour {
     
     //---Turn Management---
 
-    private void RoundCounter()
+    //Begin turn order
+    private void StartGame()
     {
-        for (int i = 0; i < maxRounds; i++)
+        ActivePlayerIndex = 0;
+        RoundCount = 0;
+
+        players[ActivePlayerIndex].TurnStart();
+    }
+    
+    public void GoToNextPlayer()
+    {
+        //Cycle through players
+        ActivePlayerIndex = ActivePlayerIndex++ % players.Count;
+        
+        //When starting through player list again, check to see if the game needs ot end based on round count.
+        if (ActivePlayerIndex == 0)
         {
-            
+            if (RoundCount >= maxRounds)
+            {
+                EndGame();
+            }
+            else
+            {
+                RoundCount++;
+                players[ActivePlayerIndex].TurnStart();
+            }
         }
     }
 
-    private void NewRound()
+    public void EndGame()
     {
-        for (int i = 0; i < players.Count; i++)
-        {
-            
-        }
+        //Tally scores, display winner yay
     }
     
     //Check Active Player energy to call from energy spending functions.
