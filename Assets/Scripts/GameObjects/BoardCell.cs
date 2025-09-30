@@ -42,11 +42,8 @@ public class BoardCell : MonoBehaviour {
             return _occupants.Count > 0 ? _occupants[^1] : baseObject;
         }
     }
-
-    public bool IsOccupied { get; set; }
-    public bool IsHovered { get; set; }
+    
     public bool IsHighlighted { get; set; }
-    public bool IsPainted { get; set; }
 
     private void Start()
     {
@@ -74,7 +71,9 @@ public class BoardCell : MonoBehaviour {
     //---Occupant Management---
     #region Occupant Management
 
-    public bool HasOccupants
+    //Returns true if the cell is occupied
+    private bool _isOccupied;
+    public bool IsOccupied
     {
         get
         {
@@ -86,15 +85,13 @@ public class BoardCell : MonoBehaviour {
     public void AddOccupant(PieceParent piece)
     {
         _occupants.Add(piece.gameObject);
-        IsOccupied = true;
+        
     }
     
     public void RemoveOccupant(PieceParent piece)
     {
         _occupants.Remove(piece.gameObject);
         CleanOccupants();
-        IsOccupied = _occupants.Count > 0;
-        
 
         CurrentOwner = DetermineOwner(null);
         RefreshPaint();

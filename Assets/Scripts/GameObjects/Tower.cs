@@ -54,7 +54,7 @@ public class Tower : MonoBehaviour
             foreach (BoardCell cell in _influencedCells)
             {
                 cell.TowerOwner = Owner;
-                if (cell.HasOccupants)
+                if (cell.IsOccupied)
                 {
                     cell.FinalizeOwnership(null);
                 }

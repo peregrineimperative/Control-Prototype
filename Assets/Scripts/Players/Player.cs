@@ -6,18 +6,17 @@ using System.Collections.Generic;
 /// </summary>
 public class Player : MonoBehaviour
 {
+    // Prefabs
     [SerializeField] private GameObject spawnPointPrefab;
     [SerializeField] private GameObject gamePiecePrefab;
     
-    public int PlayerNumber { get; set; }
-    public int Score { get; private set; }
     public int Energy { get; set; }
     public BoardCell SpawnLocation { get; set; }
     public ColorTheme ColorTheme { get; set; }
-    private List<GameObject> gamePieces = new List<GameObject>();
-    private List<BoardCell> ownedCells = new List<BoardCell>();
+    public List<GamePiece> GamePieces { get; set; }
+    //private List<BoardCell> ownedCells;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         GameObject playerSpawnPoint = Instantiate(spawnPointPrefab, transform.position, Quaternion.identity);
@@ -25,16 +24,23 @@ public class Player : MonoBehaviour
         SpawnLocation.baseObject = playerSpawnPoint;
         Debug.Log($"Spawn base: {SpawnLocation.baseObject}");
     }
-
-    // Update is called once per frame
-    void Update()
+    
+    private void TurnStart()
     {
-        
+        HasControls(true);
+        Energy = PlayerManager.Instance.maxEnergy;
     }
-
     private void TurnEnd()
     {
-        //Deactivate controls
-        //Reset energy
+        HasControls(false);
     }
+
+    private void HasControls( bool isTurn)
+    {
+        foreach (var piece in GamePieces)
+        {
+            piece.ControlsEnabled = isTurn;
+        }
+    }
+    
 }

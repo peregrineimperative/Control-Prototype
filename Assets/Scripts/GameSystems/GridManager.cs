@@ -53,15 +53,6 @@ public class GridManager : MonoBehaviour
 
     private void SpawnTowers()
     {
-        /*ReadOnlySpan<(int dx, int dz)> towerPositions = stackalloc (int dx, int dz)[]
-        {
-            (1, 7),
-            (3, 1),
-            (7, 1),
-            (4, 4),
-            (5, 7)
-        };*/
-
         Vector2Int[] towerPositions = new Vector2Int[5];
         towerPositions[0] = new Vector2Int(1, 7);
         towerPositions[1] = new Vector2Int(3, 1);

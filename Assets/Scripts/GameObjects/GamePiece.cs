@@ -8,25 +8,31 @@ using System.Collections.Generic;
 /// </summary>
 public class GamePiece : PieceParent, IDraggable
 {
+    //Movement
     private Plane _dragPlane;
     private Vector3 _dragOffset;
+    private Vector3 _startPosition;
+    private Dictionary<BoardCell, int> _reachableCells; //Holds legal moves
     
+    //Cell memory
     private BoardCell _hoveredCell;
     private BoardCell _previousCell;
     
-    private Vector3 _startPosition;
-
-    private Dictionary<BoardCell, int> _reachableCells;
+    //Visuals
     private List<BoardCell> _highlightedCells;
     private bool _isShowingHighlights;
     private bool _isInteracting;
     private bool _isDragging;
+    
+    //Turn management
+    public bool ControlsEnabled { get; set; }
     
 
     protected override void Start()
     {
         base.Start();
         CurrentCell.AddOccupant(this);
+        Owner.GamePieces.Add(this);
     }
 
     private void Update()
@@ -45,11 +51,11 @@ public class GamePiece : PieceParent, IDraggable
         }
     }
     
-    
-    
     //---Events---
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         _isInteracting = true;
         _isDragging = false;
         _startPosition = transform.position;
@@ -63,6 +69,8 @@ public class GamePiece : PieceParent, IDraggable
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         if (!_isDragging)
         {
             ResetGamePiece();
@@ -71,6 +79,8 @@ public class GamePiece : PieceParent, IDraggable
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         _isDragging = true;
         
         //Instantiate plane to keep movement on XZ, maintaining Y position
@@ -101,6 +111,8 @@ public class GamePiece : PieceParent, IDraggable
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         //Movement to raycast on _dragPlane
         var ray = Camera.main.ScreenPointToRay(eventData.position);
         
@@ -128,6 +140,8 @@ public class GamePiece : PieceParent, IDraggable
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         //If there is an actively hovered cell when ending drag, have the piece snap to that cell, otherwise return to start
         //Determine if selection is a valid move
         if (IsReachable(_hoveredCell))
@@ -225,5 +239,4 @@ public class GamePiece : PieceParent, IDraggable
             cell.RefreshPaint();
         }
     }
-    
 }
