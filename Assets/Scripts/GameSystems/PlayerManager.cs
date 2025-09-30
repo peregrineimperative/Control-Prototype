@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 /// <summary>
@@ -12,6 +13,7 @@ public class PlayerManager : MonoBehaviour {
     
     //Variables to test out; playerCount could be set in a menu later on.
     [SerializeField] private int playerCount;
+    [SerializeField] private int firstTurnEnergy;
     [SerializeField] public int maxEnergy;
     [SerializeField] private int maxRounds;
     
@@ -46,6 +48,13 @@ public class PlayerManager : MonoBehaviour {
             SpawnPlayer(i);
         }
         
+        //StartGame();
+        StartCoroutine(StartGameNextFrame());
+    }
+
+    private IEnumerator StartGameNextFrame()
+    {
+        yield return null;
         StartGame();
     }
 
@@ -67,6 +76,7 @@ public class PlayerManager : MonoBehaviour {
         player.SpawnLocation = spawnLocation.GetComponent<BoardCell>();;
         player.ColorTheme = theme;
         player.Energy = maxEnergy;
+        
         //player.PlayerNumber = players.Count + 1;
         
         players.Add(player);
@@ -81,28 +91,44 @@ public class PlayerManager : MonoBehaviour {
     {
         ActivePlayerIndex = 0;
         RoundCount = 0;
+        Debug.Log($"Starting round {RoundCount + 1} with player {ActivePlayerIndex} as active player.");
+        
+        
+        players[ActivePlayerIndex].TurnStart(firstTurnEnergy);
 
-        players[ActivePlayerIndex].TurnStart();
+        foreach (var player in players)
+        {
+            //Each SpawnPoint should create a GamePiece here
+            player.SpawnPoint.SpawnPiece();
+        }
     }
     
     public void GoToNextPlayer()
     {
         //Cycle through players
-        ActivePlayerIndex = ActivePlayerIndex++ % players.Count;
+        ActivePlayerIndex = (ActivePlayerIndex + 1) % players.Count;
         
-        //When starting through player list again, check to see if the game needs ot end based on round count.
+        
+        //If we're back to the first player, increment the round
         if (ActivePlayerIndex == 0)
         {
+            RoundCount++;
+            Debug.Log($"Starting round {RoundCount}");
+            
+            //When starting through player list again, check to see if the game needs ot end based on round count.
             if (RoundCount >= maxRounds)
             {
                 EndGame();
-            }
-            else
-            {
-                RoundCount++;
-                players[ActivePlayerIndex].TurnStart();
+                return;
             }
         }
+
+        //Start next turn
+        
+        players[ActivePlayerIndex].TurnStart(maxEnergy);
+        
+        Debug.Log($"Starting round {RoundCount + 1} with player {ActivePlayerIndex} as active player.");
+        
     }
 
     public void EndGame()

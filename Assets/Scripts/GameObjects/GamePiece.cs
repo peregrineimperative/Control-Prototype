@@ -12,6 +12,7 @@ public class GamePiece : PieceParent, IDraggable
     private Plane _dragPlane;
     private Vector3 _dragOffset;
     private Vector3 _startPosition;
+    private float _currentSnapY;
     private Dictionary<BoardCell, int> _reachableCells; //Holds legal moves
     
     //Cell memory
@@ -24,8 +25,7 @@ public class GamePiece : PieceParent, IDraggable
     private bool _isInteracting;
     private bool _isDragging;
     
-    //Turn management
-    public bool ControlsEnabled { get; set; }
+    
     
 
     protected override void Start()
@@ -33,6 +33,9 @@ public class GamePiece : PieceParent, IDraggable
         base.Start();
         CurrentCell.AddOccupant(this);
         Owner.GamePieces.Add(this);
+        ControlsEnabled = true;
+        
+        Debug.Log($"New GamePiece created for {Owner.Name}");
     }
 
     private void Update()
@@ -86,15 +89,21 @@ public class GamePiece : PieceParent, IDraggable
         //Instantiate plane to keep movement on XZ, maintaining Y position
         _dragPlane = new Plane(Vector3.up, transform.position);
         
+        
         //Get offset between GamePiece centerpoint and pointer
         var ray = Camera.main.ScreenPointToRay(eventData.position);
         _dragPlane.Raycast(ray, out float distance);
         _dragOffset = transform.position - ray.GetPoint(distance);
+        _dragOffset.y = 0f; //Maintain offset in XZ plane, Y can be determined by the hovered cell
         
-        //Cell detection
+        //Cell detection & initial drag plane height.
         _hoveredCell = TryGetCellBelow();
+        _currentSnapY = _hoveredCell != null 
+            ? _hoveredCell.GetSnapPosition(gameObject).y 
+            : transform.position.y;
         
-        //Set
+        
+        //Preview cell visual on hover
         if (IsReachable(_hoveredCell))
         {
             _previousCell = _hoveredCell;
@@ -104,9 +113,6 @@ public class GamePiece : PieceParent, IDraggable
         {
             _previousCell = CurrentCell.GetComponent<BoardCell>();
         }
-        
-        
-        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -115,12 +121,10 @@ public class GamePiece : PieceParent, IDraggable
         
         //Movement to raycast on _dragPlane
         var ray = Camera.main.ScreenPointToRay(eventData.position);
-        
         _dragPlane.Raycast(ray, out float distance);
-        
         var targetPosition = ray.GetPoint(distance) + _dragOffset;
         
-        transform.position = targetPosition;
+        transform.position = new Vector3(targetPosition.x, transform.position.y, targetPosition.z );
         
         //Cell detection
         _hoveredCell = TryGetCellBelow();
@@ -129,13 +133,25 @@ public class GamePiece : PieceParent, IDraggable
         if (_hoveredCell != _previousCell)
         {
             RestoreCellVisual(_previousCell);
+            _previousCell = _hoveredCell;
+            
+            if (IsReachable(_hoveredCell))
+            {
+                _hoveredCell.PreviewOwnership(this);
+            }
         }
-        _previousCell = _hoveredCell;
-        
-        if (IsReachable(_hoveredCell))
+        else if (IsReachable(_hoveredCell))
         {
             _hoveredCell.PreviewOwnership(this);
         }
+
+        if (_hoveredCell != null)
+        {
+            _currentSnapY = _hoveredCell.GetSnapPosition(gameObject).y;
+        }
+        
+        transform.position = new Vector3(targetPosition.x, _currentSnapY, targetPosition.z);
+        
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -148,9 +164,11 @@ public class GamePiece : PieceParent, IDraggable
         {
             if (_hoveredCell != CurrentCell)
             {
-                
                 //Deplete energy here
-                //if (_reachableCells.TryGetValue(_hoveredCell, out var cost)) {Owner.Energy -= cost;}
+                if (_reachableCells.TryGetValue(_hoveredCell, out int energyCost))
+                {
+                    Owner.TrySpendEnergy(energyCost);
+                }
                 
                 transform.position = _hoveredCell.GetSnapPosition(gameObject);
                 _hoveredCell.FinalizeOwnership(this);

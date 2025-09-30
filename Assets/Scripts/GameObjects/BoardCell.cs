@@ -58,13 +58,41 @@ public class BoardCell : MonoBehaviour {
     //Provide the highest point for a game piece to snap to.
     public Vector3 GetSnapPosition(GameObject inbound)
     {
-        var targetPosition = TopPiece.GetComponent<Transform>().position;
+        CleanOccupants();
         
-        float snapToY = TopPiece.GetComponent<Collider>().bounds.max.y + (inbound.GetComponent<Collider>().bounds.size.y / 2);
-        
-        Vector3 snapPosition = new Vector3(targetPosition.x, snapToY, targetPosition.z);
+        //Find supporting object for the inbound piece so it does not count itself for dragging/preview purposes
+        GameObject support = null;
+        for (int i = _occupants.Count - 1; i >= 0; i--)
+        {
+            var occupant = _occupants[i];
+            if (occupant != null && occupant != inbound)
+            {
+                support = occupant;
+                break;
+            }
+        }
+        if (support == null)
+        {
+            support = baseObject != null ? baseObject : gameObject;
+        }
 
-        return snapPosition;
+        //Compute the snap Y using the support's top and the inbound's half height
+        var supportTransform = support.transform;
+        var supportCollider = support.GetComponent<Collider>();
+        float supportTopY = supportCollider != null ? supportCollider.bounds.max.y : supportTransform.position.y;
+
+        float inboundHalfHeight = 0f;
+        var inboundCollider = inbound != null ? inbound.GetComponent<Collider>() : null;
+        if (inboundCollider != null)
+        {
+            inboundHalfHeight = inboundCollider.bounds.size.y * 0.5f;
+        }
+
+        float snapToY = supportTopY + inboundHalfHeight;
+        Vector3 targetPosition = supportTransform.position;
+
+        return new Vector3(targetPosition.x, snapToY, targetPosition.z);
+
     }
     #endregion
 

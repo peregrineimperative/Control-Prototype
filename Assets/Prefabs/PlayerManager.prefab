@@ -50,5 +50,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0b53c7518303db0498c4c694f866b655, type: 2}
   - {fileID: 11400000, guid: 3a173ddf2bdeb2841ba1529d668c9b4a, type: 2}
   playerCount: 2
+  firstTurnEnergy: 3
   maxEnergy: 5
-  towerPrefab: {fileID: 5460490665973821612, guid: 855486a38c42c1a479df15223f429507, type: 3}
+  maxRounds: 10

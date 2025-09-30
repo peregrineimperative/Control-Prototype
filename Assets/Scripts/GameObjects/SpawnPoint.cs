@@ -16,6 +16,8 @@ public class SpawnPoint : PieceParent, IClickable
     
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (!ControlsEnabled) return; //Enabled only during player's turn
+        
         Debug.Log("Clicked");
         
         if (Owner == null)
@@ -23,13 +25,23 @@ public class SpawnPoint : PieceParent, IClickable
             Debug.LogError($"{name}: No Player found in parents. Cannot spawn piece.");
             return;
         }
-        
+
+        //Try to spawn a piece to check if the player has adequate energy to do so.
+        if (!Owner.TrySpendEnergy(unitCost))
+        {
+            Debug.LogError($"{name}: Not enough energy to spawn piece.");
+            return;
+        }
+       
+        SpawnPiece();
+    }
+
+    public void SpawnPiece()
+    {
         var newPiece = Instantiate(piecePrefab, transform.position, Quaternion.identity);
         
         //Make sure the newly instantiated piece shares the same owner as the spawn point.
         newPiece.GetComponent<GamePiece>().Owner = Owner;
         newPiece.GetComponent<GamePiece>().CurrentCell = CurrentCell;
-        
-        //Remove energy to create game piece
     }
 }
