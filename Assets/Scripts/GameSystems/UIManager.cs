@@ -55,6 +55,6 @@ public class UIManager : MonoBehaviour
     private void HandleEnergyChanged(int energy)
     {
         int max = PlayerManager.Instance.maxEnergy;
-        energyText.text = $"{energy}/{max}";
+        energyText.text = $"Energy: {energy}/{max}";
     }
 }

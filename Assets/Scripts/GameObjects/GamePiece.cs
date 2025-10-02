@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// The players' game pieces that move around the board.
@@ -62,6 +63,9 @@ public class GamePiece : PieceParent, IDraggable
         _isInteracting = true;
         _isDragging = false;
         _startPosition = transform.position;
+        
+        //Use the adjacency check to only be able to move one cell at a time. Use the ReachableCheck to move up to energy, but it currently doesn't paint everything up to that point, so fix that first ok
+        //_reachableCells = GridManager.Instance.GetAdjacentCells(CurrentCell, true).ToDictionary(x => x, x => 1); //actually this is throwing an error inside GetAdjacentCells() which is interesting. Might not have a check to ensure that we are looking within bounds because it was only intended to work with the tower.
         _reachableCells = GridManager.Instance.GetReachableCells(CurrentCell, Owner.Energy);
 
         if (IsModifierHeld())
@@ -130,6 +134,7 @@ public class GamePiece : PieceParent, IDraggable
         _hoveredCell = TryGetCellBelow();
         
         //Preview cell color on hover
+        //please come back and clean this up
         if (_hoveredCell != _previousCell)
         {
             RestoreCellVisual(_previousCell);
@@ -151,7 +156,6 @@ public class GamePiece : PieceParent, IDraggable
         }
         
         transform.position = new Vector3(targetPosition.x, _currentSnapY, targetPosition.z);
-        
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -208,6 +212,7 @@ public class GamePiece : PieceParent, IDraggable
         
     }
     
+    //Perform a raycast from the piece being moved to determine if there is a piece below it.
     private BoardCell TryGetCellBelow()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 10, 1 << 6, QueryTriggerInteraction.Ignore))
@@ -217,7 +222,8 @@ public class GamePiece : PieceParent, IDraggable
         return null;
 
     }
-
+    
+    //Is true if there is a list of reachable cells, and the cell being passed is not null (unlikely, but here we are), and if reachable cells contains that cell.
     private bool IsReachable(BoardCell cell)
     {
         return _reachableCells != null && cell != null && _reachableCells.ContainsKey(cell);

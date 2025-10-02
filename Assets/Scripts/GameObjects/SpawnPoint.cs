@@ -32,7 +32,7 @@ public class SpawnPoint : PieceParent, IClickable
             Debug.LogError($"{name}: Not enough energy to spawn piece.");
             return;
         }
-       
+        
         SpawnPiece();
     }
 

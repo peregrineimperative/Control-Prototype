@@ -122,5 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceCollider: {fileID: 7668502900076043161}
-  renderer: {fileID: 5025101367221396848}
+  pieceRenderer: {fileID: 0}
+  _highlightColor: {r: 0, g: 0, b: 0, a: 0}
   piecePrefab: {fileID: 4594040536262804213, guid: e8df7673b8e13ee4dadf8cfc0d4e3b07, type: 3}
+  unitCost: 2

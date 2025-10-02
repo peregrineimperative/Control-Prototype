@@ -140,6 +140,7 @@ public class GridManager : MonoBehaviour
         if (start == null || maxSteps <= 0 || Grid == null) return reachableCells;
         
         //Initializing a distance grid to -1, representing unvisited cells.
+        //Future self: this is where to add the logic to determine if a previously visited cell is painted or not.
         int[,] distance = new int[gridWidth, gridDepth];
         for (int x = 0; x < gridWidth; x++)
         {
@@ -161,7 +162,11 @@ public class GridManager : MonoBehaviour
         positionQueue.Enqueue(startPosition);
         
         //Orthogonal directions to check around each already-validated cell.
-        ReadOnlySpan<(int dx, int dz)> directions = stackalloc (int dx, int dz)[] {(1,0), (-1, 0), (0, 1), (0, -1)};
+        ReadOnlySpan<(int dx, int dz)> directions = stackalloc (int dx, int dz)[]
+        {
+            (1,0), (-1, 0), (0, 1), (0, -1), //orth
+            (1,1), (1,-1), (-1,1), (-1,-1) //diag
+        };
 
         while (positionQueue.Count > 0)
         {
