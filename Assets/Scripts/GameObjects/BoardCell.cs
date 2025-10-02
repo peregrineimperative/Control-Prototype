@@ -34,7 +34,7 @@ public class BoardCell : MonoBehaviour {
     }
     
     //If the _occupants list is not zero, record the last entry on the list as the top piece. Otherwise, return the base object (usually the cell itself)
-    [SerializeField] public GameObject TopPiece
+    public GameObject TopPiece
     {
         get
         {
@@ -97,8 +97,11 @@ public class BoardCell : MonoBehaviour {
     #endregion
 
     //---Occupant Management---
+    //These functions relate to making sure the cell keeps track of what is on top of it.
     #region Occupant Management
 
+    
+    
     //Returns true if the cell is occupied
     private bool _isOccupied;
     public bool IsOccupied
@@ -131,6 +134,7 @@ public class BoardCell : MonoBehaviour {
         }
     }
 
+    //Cleans the _occupants list of empty slots.
     private void CleanOccupants()
     {
         _occupants.RemoveAll(occupant => occupant == null);
@@ -180,6 +184,7 @@ public class BoardCell : MonoBehaviour {
         }
     }
     
+    //Changes the color of the cell to match the controlling player.
     public void ApplyPaint(Player owner, bool preview)
     {
         if (owner == null)

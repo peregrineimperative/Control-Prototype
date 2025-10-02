@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
@@ -18,9 +19,10 @@ public class PlayerManager : MonoBehaviour {
     [SerializeField] private int maxRounds;
     
     //Turn management variables
-    private Player ActivePlayer { get; set; }
     private int RoundCount { get; set; }
     private int ActivePlayerIndex { get; set; }
+    public Player ActivePlayer => players != null && players.Count > 0 ? players[ActivePlayerIndex] : null;
+    public event Action<Player, int> BeginTurn; //For informing when a player's turn begins
     
     
     //---Singleton Setup---
@@ -61,7 +63,7 @@ public class PlayerManager : MonoBehaviour {
     private Player SpawnPlayer(int index)
     {
         //Pick a random color theme for a new player
-        int themeIndex = Random.Range(0, colorThemes.Count);
+        int themeIndex = UnityEngine.Random.Range(0, colorThemes.Count);
         var theme = colorThemes[themeIndex];
         colorThemes.RemoveAt(themeIndex);
         
@@ -76,6 +78,7 @@ public class PlayerManager : MonoBehaviour {
         player.SpawnLocation = spawnLocation.GetComponent<BoardCell>();;
         player.ColorTheme = theme;
         player.Energy = maxEnergy;
+        player.Name = $"Player {index + 1}";
         
         //player.PlayerNumber = players.Count + 1;
         
@@ -93,12 +96,15 @@ public class PlayerManager : MonoBehaviour {
         RoundCount = 0;
         Debug.Log($"Starting round {RoundCount + 1} with player {ActivePlayerIndex} as active player.");
         
-        
+        //Start first player's turn
         players[ActivePlayerIndex].TurnStart(firstTurnEnergy);
+        
+        //UI notification
+        BeginTurn?.Invoke(ActivePlayer, RoundCount + 1);
 
+        //Spawn initial pieces for each player
         foreach (var player in players)
         {
-            //Each SpawnPoint should create a GamePiece here
             player.SpawnPoint.SpawnPiece();
         }
     }
@@ -107,7 +113,6 @@ public class PlayerManager : MonoBehaviour {
     {
         //Cycle through players
         ActivePlayerIndex = (ActivePlayerIndex + 1) % players.Count;
-        
         
         //If we're back to the first player, increment the round
         if (ActivePlayerIndex == 0)
@@ -124,11 +129,11 @@ public class PlayerManager : MonoBehaviour {
         }
 
         //Start next turn
-        
         players[ActivePlayerIndex].TurnStart(maxEnergy);
-        
         Debug.Log($"Starting round {RoundCount + 1} with player {ActivePlayerIndex} as active player.");
         
+        //UI notification
+        BeginTurn?.Invoke(players[ActivePlayerIndex], RoundCount + 1);
     }
 
     public void EndGame()

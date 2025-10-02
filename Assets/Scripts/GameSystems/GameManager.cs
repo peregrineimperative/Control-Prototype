@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject gridManagerPrefab;
     [SerializeField] private GameObject playerManagerPrefab;
+    [SerializeField] private GameObject uiPrefab;
     
     #region Singleton Setup
     public static GameManager Instance {get; private set;}
@@ -30,5 +31,6 @@ public class GameManager : MonoBehaviour
     {
         GameObject gridManager = Instantiate(gridManagerPrefab);
         GameObject playerManager = Instantiate(playerManagerPrefab);
+        GameObject uiManager = Instantiate(uiPrefab);
     }
 }
